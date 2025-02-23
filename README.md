@@ -55,51 +55,5 @@ Make sure the following assets exist inside the correct directories:
 | `Arrow Right` | Move Right |
 | `ESC`         | Quit Game  |
 
-## 🌍 Deploying the Game to the Web (Using pygbag & Vercel)
-
-1. **Ensure Pygbag is Installed**
-   ```sh
-   pip install pygbag
-   ```
-2. **Move `main.py` to a Web-Friendly Folder**
-   ```sh
-   mkdir snake_game_web
-   mv main.py snake_game_web/
-   cd snake_game_web
-   ```
-3. **Run Pygbag**
-   ```sh
-   python -m pygbag .
-   ```
-4. **Build for Web Deployment**
-   ```sh
-   python -m pygbag --build .
-   ```
-   The final game files will be available inside `build/web/`.
-5. **Deploy on Vercel**
-   - In Vercel's project settings, set:
-     - **Install Command**:
-       ```sh
-       pip install pygbag
-       ```
-     - **Build Command**:
-       ```sh
-       python -m pygbag --build .
-       ```
-     - **Output Directory**:
-       ```
-       build/web
-       ```
-6. **Host the Game Online**
-   Upload the `build/web/` folder to Vercel or other static hosting services like **GitHub Pages, Netlify, or Itch.io**.
-
-## ❗ Troubleshooting
-
-- If `pygame` fails to install, try updating `pip`:
-  ```sh
-  python -m pip install --upgrade pip
-  ```
-- If assets are missing, ensure the `Graphics/`, `Sound/`, and `Font/` folders are correctly placed in the project directory.
-- If the game is lagging, try reducing the `clock.tick(144)` value inside `main.py`.
 
 
