@@ -1,0 +1,3 @@
+[build]
+command = "pygbag --build main.py"
+publish = "build/web"

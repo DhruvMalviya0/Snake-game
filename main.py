@@ -1,6 +1,12 @@
-import pygame,sys,random
+import pygame, sys, random, os
 from pygame.math import Vector2
+import asyncio
 
+def load_image(name):
+    return pygame.image.load(os.path.join('Graphics', name)).convert_alpha()
+
+def load_sound(name):
+    return pygame.mixer.Sound(os.path.join('Sound', name))
 class SNAKE:
 	def __init__(self):
 		self.body = [Vector2(5,10),Vector2(4,10),Vector2(3,10)]
@@ -24,7 +30,10 @@ class SNAKE:
 		self.body_tl = pygame.image.load('Graphics/body_tl.png').convert_alpha()
 		self.body_br = pygame.image.load('Graphics/body_br.png').convert_alpha()
 		self.body_bl = pygame.image.load('Graphics/body_bl.png').convert_alpha()
-		self.crunch_sound = pygame.mixer.Sound('Sound/crunch.wav')
+		try:
+			self.crunch_sound = load_sound('crunch.wav')
+		except:
+			print("Sound loading failed - web version may not support audio")
 
 	def draw_snake(self):
 		self.update_head_graphics()
@@ -171,42 +180,53 @@ class MAIN:
 		screen.blit(apple,apple_rect)
 		pygame.draw.rect(screen,(56,74,12),bg_rect,2)
 
-pygame.mixer.pre_init(44100,-16,2,512)
-pygame.init()
-cell_size = 40
-cell_number = 20
-screen = pygame.display.set_mode((cell_number * cell_size,cell_number * cell_size))
-clock = pygame.time.Clock()
-apple = pygame.image.load('Graphics/apple.png').convert_alpha()
-game_font = pygame.font.Font('Font/PoetsenOne-Regular.ttf', 25)
+async def main():
+    pygame.mixer.pre_init(44100,-16,2,512)
+    pygame.init()
+    
+    global cell_size, cell_number, screen, clock, apple, game_font
+    cell_size = 40
+    cell_number = 20
+    screen = pygame.display.set_mode((cell_number * cell_size,cell_number * cell_size))
+    clock = pygame.time.Clock()
+    
+    try:
+        apple = load_image('apple.png')
+        game_font = pygame.font.Font(os.path.join('Font', 'PoetsenOne-Regular.ttf'), 25)
+    except:
+        print("Using fallback font")
+        game_font = pygame.font.SysFont('arial', 25)
 
-SCREEN_UPDATE = pygame.USEREVENT
-pygame.time.set_timer(SCREEN_UPDATE,150)
+    SCREEN_UPDATE = pygame.USEREVENT
+    pygame.time.set_timer(SCREEN_UPDATE,150)
 
-main_game = MAIN() 
+    main_game = MAIN()
 
-while True:
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			pygame.quitw()
-			sys.exit()
-		if event.type == SCREEN_UPDATE:
-			main_game.update()
-		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_UP:
-				if main_game.snake.direction.y != 1:
-					main_game.snake.direction = Vector2(0,-1)
-			if event.key == pygame.K_RIGHT:
-				if main_game.snake.direction.x != -1:
-					main_game.snake.direction = Vector2(1,0)
-			if event.key == pygame.K_DOWN:
-				if main_game.snake.direction.y != -1:
-					main_game.snake.direction = Vector2(0,1)
-			if event.key == pygame.K_LEFT:
-				if main_game.snake.direction.x != 1:
-					main_game.snake.direction = Vector2(-1,0)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == SCREEN_UPDATE:
+                main_game.update()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    if main_game.snake.direction.y != 1:
+                        main_game.snake.direction = Vector2(0,-1)
+                if event.key == pygame.K_RIGHT:
+                    if main_game.snake.direction.x != -1:
+                        main_game.snake.direction = Vector2(1,0)
+                if event.key == pygame.K_DOWN:
+                    if main_game.snake.direction.y != -1:
+                        main_game.snake.direction = Vector2(0,1)
+                if event.key == pygame.K_LEFT:
+                    if main_game.snake.direction.x != 1:
+                        main_game.snake.direction = Vector2(-1,0)
 
-	screen.fill((175,215,70))
-	main_game.draw_elements()
-	pygame.display.update()
-	clock.tick(144)
+        screen.fill((175,215,70))
+        main_game.draw_elements()
+        pygame.display.flip()
+        clock.tick(60)  # Reduced from 144 for better web performance
+        await asyncio.sleep(0)  # Required for web deployment
+
+asyncio.run(main())
